@@ -61,7 +61,7 @@ export class AppComponent {
       const randomLed = leds[Math.floor(Math.random() * leds.length)];
       this.glitchingLed.set(randomLed);
       setTimeout(() => this.glitchingLed.set(null), 2000 + Math.random() * 3000);
-    }, 6000 + Math.random() * 8000);
+    }, 8000 + Math.random() * 4000); // Circa ogni 10 secondi (8s + 0-4s)
   }
 
   private generateParticles(count: number): Particle[] {
@@ -116,7 +116,7 @@ export class AppComponent {
     this.currentLevel.set(1);
     this.generateChallenge();
     this.view.set('playing');
-    this.audioService.startAmbientSounds();
+    // this.audioService.startAmbientSounds(); // DISABLED - To re-enable later
   }
 
   resetGame() {
@@ -127,7 +127,7 @@ export class AppComponent {
 
   returnToMenu() {
     this.view.set('menu');
-    this.audioService.stopAmbientSounds();
+    // this.audioService.stopAmbientSounds(); // DISABLED - To re-enable later
   }
 
   generateChallenge() {
@@ -191,7 +191,7 @@ export class AppComponent {
 
   private async executeWinSequence(v1: number, v2: number, target: number) {
     this.isWinner.set(true);
-    this.audioService.playSuccess();
+    // this.audioService.playSuccess(); // DISABLED - To re-enable later
     this.winMessage.set('Sync successfully established');
 
     setTimeout(() => {

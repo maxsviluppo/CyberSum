@@ -164,7 +164,7 @@ export class ReelComponent {
     const index = (Math.round(-snappedAngle / this.angleStep) % this.segmentCount + this.segmentCount) % this.segmentCount;
 
     setTimeout(() => {
-      this.audioService.playReelStop();
+      // this.audioService.playReelStop(); // DISABLED REEL SOUND
       const r = this.range();
       if (r.length > 0) {
         this.onValueChange.emit(r[index % r.length]);

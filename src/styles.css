@@ -82,12 +82,14 @@ body {
   position: absolute;
   border-radius: 50%;
   filter: blur(160px);
-  opacity: 0.07;
+  opacity: 0.02;
+  /* Reduced from 0.07 */
   pointer-events: none;
   mix-blend-mode: screen;
   will-change: transform, opacity;
 }
 
+/* Blob Animations */
 .blob-1 {
   width: 700px;
   height: 700px;
@@ -172,29 +174,6 @@ body {
   }
 }
 
-
-/* Effetto Neon 3D sotto il contenitore del gioco */
-
-/* Effetto Neon 3D sotto il contenitore del gioco */
-.console-frame {
-  filter: drop-shadow(0 8px 25px rgba(249, 115, 22, 0.15));
-}
-
-.console-frame::after {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: 2.5rem;
-  background: linear-gradient(135deg,
-      rgba(249, 115, 22, 0.08) 0%,
-      rgba(234, 88, 12, 0.12) 50%,
-      rgba(249, 115, 22, 0.08) 100%);
-  filter: blur(20px);
-  z-index: -1;
-  opacity: 0.6;
-  animation: neon-pulse 3s ease-in-out infinite;
-}
-
 @keyframes neon-pulse {
 
   0%,
@@ -207,6 +186,33 @@ body {
     opacity: 0.7;
     transform: scale(1.02);
   }
+}
+
+/* Effetto Neon 3D sotto il contenitore del gioco - POTENZIATO */
+.console-frame {
+  box-shadow:
+    0 20px 50px -10px rgba(249, 115, 22, 0.25),
+    /* Deep Glow Underneath */
+    0 0 20px rgba(0, 0, 0, 0.8);
+  /* Sharp Shadow for depth */
+  transform: translateZ(0);
+  /* Hardware accel */
+}
+
+.console-frame::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 2.5rem;
+  background: linear-gradient(135deg,
+      rgba(249, 115, 22, 0.08) 0%,
+      rgba(234, 88, 12, 0.12) 50%,
+      rgba(249, 115, 22, 0.08) 100%);
+  filter: blur(25px);
+  /* Increased blur */
+  z-index: -1;
+  opacity: 0.6;
+  animation: neon-pulse 3s ease-in-out infinite;
 }
 
 /* Numero Target - Ultra Luminoso Arancio */
@@ -411,4 +417,66 @@ body {
   transition: opacity 0.5s;
   pointer-events: none;
   z-index: 20;
+}
+
+/* Neon Light from Above - Simulates broken neon sign */
+.neon-light-above {
+  position: fixed;
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 200px;
+  background: radial-gradient(ellipse at center, rgba(249, 115, 22, 0.4), transparent 70%);
+  filter: blur(80px);
+  z-index: 1;
+  pointer-events: none;
+  animation: neon-flicker-above 4s infinite;
+}
+
+@keyframes neon-flicker-above {
+
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: translateX(-50%) scale(1);
+  }
+
+  5% {
+    opacity: 0.05;
+  }
+
+  10% {
+    opacity: 0.25;
+  }
+
+  15% {
+    opacity: 0.08;
+  }
+
+  20% {
+    opacity: 0.3;
+  }
+
+  25%,
+  70% {
+    opacity: 0.18;
+    transform: translateX(-50%) scale(1.05);
+  }
+
+  75% {
+    opacity: 0.1;
+  }
+
+  80% {
+    opacity: 0.22;
+  }
+
+  85% {
+    opacity: 0.12;
+  }
+
+  90% {
+    opacity: 0.2;
+  }
 }
