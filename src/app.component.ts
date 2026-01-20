@@ -110,7 +110,6 @@ export class AppComponent {
     } catch (err) {
       console.warn('Fullscreen interaction failed or was denied by the environment:', err);
     }
-    this.audioService.playClick();
   }
 
   startGame() {
