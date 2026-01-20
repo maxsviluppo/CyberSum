@@ -52,21 +52,8 @@
     <div
       class="console-frame w-full flex flex-col justify-between p-4 md:p-6 relative overflow-hidden rounded-[2.5rem] border border-orange-900/30 bg-black/80 backdrop-blur-3xl neon-border min-h-0 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
 
-      <!-- Scintilla Perimetrale (Walking Spark) -->
-      <!-- Scintilla Perimetrale (Walking Spark) -->
-      <svg class="absolute inset-0 w-full h-full pointer-events-none z-50 overflow-visible">
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <rect x="2" y="2" width="99%" height="99%" rx="2.2rem" ry="2.2rem" class="neon-spark-path" fill="none"
-          stroke-linecap="round" />
-      </svg>
+
+      <!-- Success Overlay -->
 
       <!-- Success Overlay -->
       @if (isWinner()) {

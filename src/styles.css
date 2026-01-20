@@ -172,30 +172,8 @@ body {
   }
 }
 
-/* Scintilla Perimetrale - LED che cammina sul bordo con alone e ombra */
-.neon-spark-path {
-  stroke: #ff8c00;
-  stroke-dasharray: 200 6000;
-  /* Scia di 200px, spazio enorme */
-  stroke-dashoffset: 6200;
-  animation: spark-travel 12s linear infinite;
-  will-change: stroke-dashoffset;
-  filter:
-    drop-shadow(0 0 10px #ff8c00) drop-shadow(0 0 20px #f97316) drop-shadow(0 0 35px rgba(255, 140, 0, 0.8)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
-  stroke-linecap: round;
-  stroke-width: 4;
-  opacity: 0.95;
-}
 
-@keyframes spark-travel {
-  from {
-    stroke-dashoffset: 6200;
-  }
-
-  to {
-    stroke-dashoffset: 0;
-  }
-}
+/* Effetto Neon 3D sotto il contenitore del gioco */
 
 /* Effetto Neon 3D sotto il contenitore del gioco */
 .console-frame {
