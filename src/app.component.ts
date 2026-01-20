@@ -48,9 +48,20 @@ export class AppComponent {
   winMessage = signal('');
 
   targetParticles = signal<Particle[]>(this.generateParticles(15));
+  glitchingLed = signal<'target' | 'reel' | 'display' | null>(null);
 
   constructor() {
     this.generateChallenge();
+    this.startLedGlitches();
+  }
+
+  private startLedGlitches() {
+    setInterval(() => {
+      const leds: Array<'target' | 'reel' | 'display' | null> = ['target', 'reel', 'display'];
+      const randomLed = leds[Math.floor(Math.random() * leds.length)];
+      this.glitchingLed.set(randomLed);
+      setTimeout(() => this.glitchingLed.set(null), 2000 + Math.random() * 3000);
+    }, 6000 + Math.random() * 8000);
   }
 
   private generateParticles(count: number): Particle[] {
@@ -106,19 +117,18 @@ export class AppComponent {
     this.currentLevel.set(1);
     this.generateChallenge();
     this.view.set('playing');
-    this.audioService.playConfirm();
+    this.audioService.startAmbientSounds();
   }
 
   resetGame() {
     this.currentLevel.set(1);
     this.generateChallenge();
-    this.audioService.playConfirm();
     this.aiMessage.set("SESSION_REBOOTED_LEVEL_01");
   }
 
   returnToMenu() {
     this.view.set('menu');
-    this.audioService.playClick();
+    this.audioService.stopAmbientSounds();
   }
 
   generateChallenge() {
@@ -168,17 +178,15 @@ export class AppComponent {
       const target = this.targetSum();
 
       this.gameState.set('checking');
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 800));
 
       if (sum === target) {
         this.executeWinSequence(v1, v2, target);
       } else {
-        const msg = await this.aiService.getFeedback('loss', target, v1, v2);
-        this.aiMessage.set(msg.toUpperCase());
+        this.gameState.set('result');
       }
-      this.gameState.set('result');
     } else {
-      this.aiMessage.set("INCOMPLETE_SEQUENCE...");
+      this.gameState.set('idle');
     }
   }
 
@@ -186,9 +194,6 @@ export class AppComponent {
     this.isWinner.set(true);
     this.audioService.playSuccess();
     this.winMessage.set('Sync successfully established');
-
-    const msg = await this.aiService.getFeedback('win', target, v1, v2);
-    this.aiMessage.set(msg.toUpperCase());
 
     setTimeout(() => {
       const nextLevel = this.currentLevel() + 1;

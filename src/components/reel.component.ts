@@ -11,7 +11,7 @@ import { AudioService } from '../services/audio.service';
       <!-- Outer Glass Frame -->
       <div 
         #viewport
-        class="reel-outer-frame relative w-[101px] md:w-[149px] h-56 md:h-72 bg-black rounded-[1.5rem] border border-orange-500/10 select-none overflow-hidden touch-none"
+        class="reel-outer-frame relative w-[111px] md:w-[159px] h-56 md:h-72 bg-black rounded-[1.5rem] border border-orange-500/10 select-none overflow-hidden touch-none"
         [class.animate-overload]="isWinning()"
         (mousedown)="onDragStart($event)"
         (touchstart)="onDragStart($event)"
@@ -135,10 +135,6 @@ export class ReelComponent {
       const rotationDelta = -deltaY * 0.42; // Sensibilità calibrata
       this.currentRotation.set(this.startRotation + rotationDelta);
 
-      if (Math.abs(dy) > 15) {
-        this.audioService.playClick();
-      }
-
       this.lastY = currentY;
       this.lastTimestamp = now;
     };
@@ -168,7 +164,7 @@ export class ReelComponent {
     const index = (Math.round(-snappedAngle / this.angleStep) % this.segmentCount + this.segmentCount) % this.segmentCount;
 
     setTimeout(() => {
-      this.audioService.playConfirm();
+      this.audioService.playReelStop();
       const r = this.range();
       if (r.length > 0) {
         this.onValueChange.emit(r[index % r.length]);

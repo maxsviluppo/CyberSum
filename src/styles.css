@@ -2,6 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+/* LED Glitch Effect - Lampeggio guasto */
+@keyframes led-glitch {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  10% {
+    opacity: 0.3;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  20% {
+    opacity: 0.1;
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  40% {
+    opacity: 0.5;
+  }
+
+  45% {
+    opacity: 1;
+  }
+
+  60% {
+    opacity: 0.2;
+  }
+
+  65% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 0.4;
+  }
+
+  85% {
+    opacity: 1;
+  }
+}
+
+.led-glitching {
+  animation: led-glitch 0.8s ease-in-out infinite;
+}
+
 /* Custom styles from index.html */
 body {
   margin: 0;
@@ -119,15 +172,17 @@ body {
   }
 }
 
-/* Scintilla Perimetrale - Cammina sul bordo */
+/* Scintilla Perimetrale - LED che cammina sul bordo con alone e ombra */
 .neon-spark-path {
-  stroke: #f97316;
-  stroke-dasharray: 500 2500;
+  stroke: #ff8c00;
+  stroke-dasharray: 400 2600;
   stroke-dashoffset: 3000;
-  animation: spark-travel 8s linear infinite;
-  filter: drop-shadow(0 0 8px #f97316) drop-shadow(0 0 15px #ea580c);
+  animation: spark-travel 10s linear infinite;
+  filter:
+    drop-shadow(0 0 20px #ff8c00) drop-shadow(0 0 35px #f97316) drop-shadow(0 0 50px rgba(255, 140, 0, 0.8)) drop-shadow(0 3px 12px rgba(0, 0, 0, 0.9));
   stroke-linecap: round;
-  stroke-width: 5;
+  stroke-width: 8;
+  opacity: 0.95;
 }
 
 @keyframes spark-travel {
@@ -137,6 +192,40 @@ body {
 
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+/* Effetto Neon 3D sotto il contenitore del gioco */
+.console-frame {
+  filter: drop-shadow(0 8px 25px rgba(249, 115, 22, 0.15));
+}
+
+.console-frame::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 2.5rem;
+  background: linear-gradient(135deg,
+      rgba(249, 115, 22, 0.08) 0%,
+      rgba(234, 88, 12, 0.12) 50%,
+      rgba(249, 115, 22, 0.08) 100%);
+  filter: blur(20px);
+  z-index: -1;
+  opacity: 0.6;
+  animation: neon-pulse 3s ease-in-out infinite;
+}
+
+@keyframes neon-pulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
   }
 }
 
