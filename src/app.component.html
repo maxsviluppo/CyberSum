@@ -87,14 +87,23 @@
       <!-- Success Overlay -->
 
       <!-- Full Screen Video Overlay -->
+      <!-- Autoplay rimosso per gestione manuale in TS (per gestire errori mobile) -->
       @if (showEventVideo()) {
       <div class="fixed inset-0 z-[100] bg-black flex items-center justify-center animate-in fade-in duration-500"
         [class.opacity-0]="isTransitioning()" [class.duration-1000]="isTransitioning()"
         [class.transition-opacity]="isTransitioning()">
-        <video class="w-[calc(100%+50px)] h-[calc(100%+50px)] max-w-none max-h-none object-contain scale-110" autoplay
-          playsinline [muted]="isMuted()" preload="auto" (ended)="onVideoEnded()" (error)="onVideoError()">
+
+        <video #winVideo class="w-[calc(100%+50px)] h-[calc(100%+50px)] max-w-none max-h-none object-contain scale-110"
+          playsinline preload="auto" (ended)="onVideoEnded()" (error)="onVideoError()">
           <source src="win-video.mp4" type="video/mp4">
         </video>
+
+        <!-- Fallback Play Button (visibile solo se l'autoplay fallisce del tutto) -->
+        <button (click)="forcePlayVideo()"
+          class="absolute z-[110] p-4 bg-orange-600/80 rounded-full animate-pulse text-white font-bold"
+          style="display: none;" id="force-play-btn">
+          TAP TO PLAY
+        </button>
       </div>
       }
       <!-- End Full Screen Video Overlay -->

@@ -1,4 +1,4 @@
-import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReelComponent } from './components/reel.component';
 import { AudioService } from './services/audio.service';
@@ -54,6 +54,8 @@ export class AppComponent {
   glitchingLed = signal<'target' | 'reel' | 'display' | null>(null);
   showEventVideo = signal(false);
   showSyncMessage = signal(false);
+
+  @ViewChild('winVideo') winVideo!: ElementRef<HTMLVideoElement>;
 
   constructor() {
     this.generateChallenge();
@@ -229,11 +231,58 @@ export class AppComponent {
     this.isWinner.set(true);
     this.audioService.stopAmbientSounds(); // Stop ambient loop for video
     this.showEventVideo.set(true);
-    // Sequence continues in onVideoEnded
+
+    // Attendi render e avvia video
+    setTimeout(() => {
+      this.playVideoSafe();
+    }, 50);
+  }
+
+  async playVideoSafe() {
+    if (!this.winVideo) return;
+    const video = this.winVideo.nativeElement;
+    const btn = document.getElementById('force-play-btn');
+
+    // Reset stat
+    video.currentTime = 0;
+
+    // Sync mute state
+    video.muted = this.isMuted();
+
+    try {
+      await video.play();
+      // Successo!
+      if (btn) btn.style.display = 'none';
+
+    } catch (err: any) {
+      console.warn("Autoplay with audio blocked:", err);
+
+      // Fallback 1: Prova Muted
+      try {
+        video.muted = true;
+        await video.play();
+        console.log("Fallback to muted video success");
+        if (btn) btn.style.display = 'none';
+
+        // Se siamo finiti qui, significa che l'audio del video è perso.
+        // Possiamo provare a suonare un fallback via AudioService se disponibile?
+        // this.audioService.playSuccess(); // Opzionale
+
+      } catch (errMuted) {
+        console.error("Video play completely blocked:", errMuted);
+        // Fallback 2: Mostra bottone per interazione manuale
+        if (btn) btn.style.display = 'block';
+      }
+    }
+  }
+
+  forcePlayVideo() {
+    this.playVideoSafe();
   }
 
   onVideoEnded() {
     this.showEventVideo.set(false);
+
 
     // Start fondo.wav immediately after video
     this.audioService.startAmbientSounds();
