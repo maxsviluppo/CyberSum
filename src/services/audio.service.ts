@@ -276,14 +276,14 @@ export class AudioService {
     this.ambienceNodes = [];
   }
 
-  // Suono di successo per la vittoria (upgrade.mp3)
+  // Suono di successo per la vittoria (ungradelink.mp3)
   async playSuccess() {
     if (this.isMuted) return;
     this.init();
     if (!this.audioCtx) return;
 
     try {
-      const response = await fetch('upgrade.mp3');
+      const response = await fetch('ungradelink.mp3');
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
@@ -299,7 +299,7 @@ export class AudioService {
 
       source.start(0);
     } catch (error) {
-      console.warn('Errore riproduzione suono vittoria (upgrade.mp3):', error);
+      console.warn('Errore riproduzione suono vittoria (ungradelink.mp3):', error);
       // Fallback in caso di errore (piccolo beep)
       if (this.audioCtx) {
         const osc = this.audioCtx.createOscillator();
