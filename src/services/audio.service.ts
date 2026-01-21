@@ -219,74 +219,32 @@ export class AudioService {
   // --- Generatore Atmosfera Spaziale (Deep Space Drone) ---
   private ambienceNodes: AudioNode[] = [];
 
-  startAmbientSounds() {
+  async startAmbientSounds() {
     if (this.isMuted || this.ambienceNodes.length > 0) return;
     this.init();
     if (!this.audioCtx) return;
 
-    const ctx = this.audioCtx;
-    const t = ctx.currentTime;
+    try {
+      const response = await fetch('fondo.wav');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
 
-    // 1. Rumore di fondo (Deep Rumble)
-    const bufferSize = 2 * ctx.sampleRate;
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    let lastOut = 0;
-    for (let i = 0; i < bufferSize; i++) {
-      const white = Math.random() * 2 - 1;
-      output[i] = (lastOut + (0.02 * white)) / 1.02;
-      lastOut = output[i];
-      output[i] *= 3.5;
+      const source = this.audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.loop = true;
+
+      const gainNode = this.audioCtx.createGain();
+      gainNode.gain.value = 0.5; // Volume regolabile per il fondo
+
+      source.connect(gainNode);
+      gainNode.connect(this.audioCtx.destination);
+
+      source.start(0);
+      this.ambienceNodes.push(source, gainNode);
+    } catch (error) {
+      console.error('Errore riproduzione suono fondo (fondo.wav):', error);
     }
-
-    const noiseSrc = ctx.createBufferSource();
-    noiseSrc.buffer = noiseBuffer;
-    noiseSrc.loop = true;
-
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.value = 120; // Molto basso e cupo
-
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.value = 0.15; // Volume background
-
-    noiseSrc.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-    noiseSrc.start(t);
-    this.ambienceNodes.push(noiseSrc, noiseFilter, noiseGain);
-
-    // 2. Oscillatore Basso 1 (Drone)
-    const osc1 = ctx.createOscillator();
-    osc1.frequency.value = 55; // La
-    const gain1 = ctx.createGain();
-    gain1.gain.value = 0.05;
-
-    // LFO per modulare leggermente il volume
-    const lfo = ctx.createOscillator();
-    lfo.frequency.value = 0.1;
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 0.02;
-    lfo.connect(lfoGain);
-    lfoGain.connect(gain1.gain);
-    lfo.start(t);
-
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.start(t);
-    this.ambienceNodes.push(osc1, gain1, lfo, lfoGain);
-
-    // 3. Oscillatore Basso 2 (Detuned Interference)
-    const osc2 = ctx.createOscillator();
-    osc2.type = 'triangle';
-    osc2.frequency.value = 56; // Leggermente sfasato per battimento
-    const gain2 = ctx.createGain();
-    gain2.gain.value = 0.03;
-
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.start(t);
-    this.ambienceNodes.push(osc2, gain2);
   }
 
   stopAmbientSounds() {
@@ -335,6 +293,33 @@ export class AudioService {
         osc.start();
         osc.stop(this.audioCtx.currentTime + 0.1);
       }
+    }
+  }
+
+  // Suono per la fase di sincronizzazione (link link.wav)
+  async playLinkSound() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.audioCtx) return;
+
+    try {
+      const response = await fetch('link link.wav');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+
+      const source = this.audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+
+      const gainNode = this.audioCtx.createGain();
+      gainNode.gain.value = 0.7;
+
+      source.connect(gainNode);
+      gainNode.connect(this.audioCtx.destination);
+
+      source.start(0);
+    } catch (error) {
+      console.warn('Errore riproduzione suono link (link link.wav):', error);
     }
   }
 }

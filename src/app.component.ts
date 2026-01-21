@@ -53,6 +53,7 @@ export class AppComponent {
   targetParticles = signal<Particle[]>(this.generateParticles(15));
   glitchingLed = signal<'target' | 'reel' | 'display' | null>(null);
   showEventVideo = signal(false);
+  showSyncMessage = signal(false);
 
   constructor() {
     this.generateChallenge();
@@ -148,7 +149,7 @@ export class AppComponent {
     this.currentLevel.set(1);
     this.generateChallenge();
     this.view.set('playing');
-    this.audioService.startAmbientSounds(); // RE-ENABLED (controlled by service flag)
+    this.audioService.startAmbientSounds();
   }
 
   resetGame() {
@@ -161,7 +162,7 @@ export class AppComponent {
   returnToMenu() {
     this.audioService.playButtonClick();
     this.view.set('menu');
-    this.audioService.stopAmbientSounds(); // RE-ENABLED
+    this.audioService.stopAmbientSounds();
     this.audioService.startHomeMusic();
   }
 
@@ -227,21 +228,42 @@ export class AppComponent {
 
   private async executeWinSequence(v1: number, v2: number, target: number) {
     this.isWinner.set(true);
+    this.audioService.stopAmbientSounds(); // Stop ambient loop for video
     this.showEventVideo.set(true);
-    this.winMessage.set('Sync successfully established');
     // Sequence continues in onVideoEnded
   }
 
   onVideoEnded() {
-    // 1. Start fade out of the win overlay
-    this.isTransitioning.set(true);
+    this.showEventVideo.set(false);
 
-    // 2. Wait for fade out animation (e.g. 1s) then reset for next level
+    // Start Sync Phase
+    this.showSyncMessage.set(true);
+    this.audioService.playLinkSound();
+
+    // Fade in is handled by CSS animation (animate-in fade-in)
+
+    // Wait 4 seconds for reading the message
     setTimeout(() => {
-      this.showEventVideo.set(false);
-      this.currentLevel.update(l => l + 1);
-      this.generateChallenge(); // This sets isWinner to false
-      this.isTransitioning.set(false);
-    }, 1000);
+      // Start fade out transition
+      this.isTransitioning.set(true);
+
+      // Wait for fade out (1s)
+      setTimeout(() => {
+        this.showSyncMessage.set(false);
+        this.isTransitioning.set(false);
+
+        // Progress Level
+        this.currentLevel.update(l => l + 1);
+        this.generateChallenge(); // This resets isWinner to false
+
+        // Resume Game Ambient
+        this.audioService.startAmbientSounds();
+      }, 1000);
+    }, 4000);
+  }
+
+  onVideoError() {
+    console.warn("Video failed to load or play. Skipping directly to sync screen.");
+    this.onVideoEnded();
   }
 }
