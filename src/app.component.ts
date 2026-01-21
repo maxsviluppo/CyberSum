@@ -246,33 +246,25 @@ export class AppComponent {
     // Reset stat
     video.currentTime = 0;
 
-    // Sync mute state
-    video.muted = this.isMuted();
+    // STRATEGIA IBRIDA:
+    // Video sempre MUTO per garantire l'autoplay su tutti i device (iOS/Android).
+    // L'audio viene gestito separatamente dall'AudioService (già sbloccato dal click utente).
+    video.muted = true;
 
     try {
       await video.play();
-      // Successo!
+      // Successo video!
       if (btn) btn.style.display = 'none';
 
-    } catch (err: any) {
-      console.warn("Autoplay with audio blocked:", err);
-
-      // Fallback 1: Prova Muted
-      try {
-        video.muted = true;
-        await video.play();
-        console.log("Fallback to muted video success");
-        if (btn) btn.style.display = 'none';
-
-        // Se siamo finiti qui, significa che l'audio del video è perso.
-        // Possiamo provare a suonare un fallback via AudioService se disponibile?
-        // this.audioService.playSuccess(); // Opzionale
-
-      } catch (errMuted) {
-        console.error("Video play completely blocked:", errMuted);
-        // Fallback 2: Mostra bottone per interazione manuale
-        if (btn) btn.style.display = 'block';
+      // Se l'audio è attivo, riproduciamo la traccia audio separata
+      if (!this.isMuted()) {
+        this.audioService.playSuccess();
       }
+
+    } catch (err) {
+      console.warn("Autoplay blocked even with muted video:", err);
+      // Fallback estremo: Mostra bottone
+      if (btn) btn.style.display = 'block';
     }
   }
 
