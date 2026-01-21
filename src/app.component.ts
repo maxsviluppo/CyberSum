@@ -58,6 +58,7 @@ export class AppComponent {
   constructor() {
     this.generateChallenge();
     this.startLedGlitches();
+    // Try to start home music (may be blocked by browser autoplay policy)
     this.audioService.startHomeMusic();
   }
 
@@ -76,12 +77,10 @@ export class AppComponent {
   }
 
   unlockAudio() {
-    // Attempt to resume audio context on any click if it's suspended (autoplay policy)
-    // and if we are not muted.
-    if (!this.isMuted()) {
-      if (this.view() === 'menu') {
-        this.audioService.startHomeMusic();
-      }
+    // Attempt to resume audio context and start home music on any click
+    // This handles browser autoplay policies
+    if (!this.isMuted() && this.view() === 'menu') {
+      this.audioService.startHomeMusic();
     }
   }
 
