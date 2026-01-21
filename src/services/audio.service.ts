@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 export class AudioService {
   private audioCtx: AudioContext | null = null;
   private ambientInterval: any = null;
-  private isMuted = true;
+  private isMuted = false;
 
   toggleMute() {
     this.isMuted = !this.isMuted;
@@ -191,7 +191,7 @@ export class AudioService {
       this.homeMusicSource.loop = true;
 
       this.homeMusicGain = this.audioCtx.createGain();
-      this.homeMusicGain.gain.value = 0.5; // Adjust volume as needed
+      this.homeMusicGain.gain.value = 0.45; // Ridotto volume del 5% (da 0.50)
 
       this.homeMusicSource.connect(this.homeMusicGain);
       this.homeMusicGain.connect(this.audioCtx.destination);
@@ -301,28 +301,40 @@ export class AudioService {
     this.ambienceNodes = [];
   }
 
-  // Manteniamo solo il suono di successo per la vittoria
-  playSuccess() {
+  // Suono di successo per la vittoria (upgrade.mp3)
+  async playSuccess() {
     if (this.isMuted) return;
     this.init();
     if (!this.audioCtx) return;
-    const now = this.audioCtx.currentTime;
 
-    // Accordo di vittoria più discreto
-    const frequencies = [523.25, 659.25, 783.99];
+    try {
+      const response = await fetch('upgrade.mp3');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
 
-    frequencies.forEach((freq, i) => {
-      const osc = this.audioCtx!.createOscillator();
-      const gain = this.audioCtx!.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now + (i * 0.08));
-      gain.gain.setValueAtTime(0, now + (i * 0.08));
-      gain.gain.linearRampToValueAtTime(0.25, now + (i * 0.08) + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + (i * 0.08) + 0.4);
-      osc.connect(gain);
-      gain.connect(this.audioCtx!.destination);
-      osc.start(now + (i * 0.08));
-      osc.stop(now + (i * 0.08) + 0.5);
-    });
+      const source = this.audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+
+      const gainNode = this.audioCtx.createGain();
+      gainNode.gain.value = 0.8; // Volume per la vittoria
+
+      source.connect(gainNode);
+      gainNode.connect(this.audioCtx.destination);
+
+      source.start(0);
+    } catch (error) {
+      console.warn('Errore riproduzione suono vittoria (upgrade.mp3):', error);
+      // Fallback in caso di errore (piccolo beep)
+      if (this.audioCtx) {
+        const osc = this.audioCtx.createOscillator();
+        const g = this.audioCtx.createGain();
+        osc.connect(g);
+        g.connect(this.audioCtx.destination);
+        osc.frequency.value = 880;
+        osc.start();
+        osc.stop(this.audioCtx.currentTime + 0.1);
+      }
+    }
   }
 }

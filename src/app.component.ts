@@ -26,7 +26,8 @@ interface Particle {
     '(document:fullscreenchange)': 'onFullscreenChange()',
     '(document:webkitfullscreenchange)': 'onFullscreenChange()',
     '(document:mozfullscreenchange)': 'onFullscreenChange()',
-    '(document:MSFullscreenChange)': 'onFullscreenChange()'
+    '(document:MSFullscreenChange)': 'onFullscreenChange()',
+    '(window:click)': 'unlockAudio()'
   }
 })
 export class AppComponent {
@@ -43,13 +44,15 @@ export class AppComponent {
   reel1Val = signal<number | null>(null);
   reel2Val = signal<number | null>(null);
   isWinner = signal(false);
+  isTransitioning = signal(false);
   aiMessage = signal("AWAITING_INPUT...");
   isFullscreen = signal(false);
-  isMuted = signal(true);
+  isMuted = signal(false);
   winMessage = signal('');
 
   targetParticles = signal<Particle[]>(this.generateParticles(15));
   glitchingLed = signal<'target' | 'reel' | 'display' | null>(null);
+  showEventVideo = signal(false);
 
   constructor() {
     this.generateChallenge();
@@ -67,6 +70,16 @@ export class AppComponent {
         this.audioService.startHomeMusic();
       } else {
         this.audioService.startAmbientSounds();
+      }
+    }
+  }
+
+  unlockAudio() {
+    // Attempt to resume audio context on any click if it's suspended (autoplay policy)
+    // and if we are not muted.
+    if (!this.isMuted()) {
+      if (this.view() === 'menu') {
+        this.audioService.startHomeMusic();
       }
     }
   }
@@ -175,6 +188,7 @@ export class AppComponent {
     this.numbers2.set(genSet(sol2));
 
     this.reel1Val.set(null);
+    this.showEventVideo.set(false);
     this.reel2Val.set(null);
     this.isWinner.set(false);
     this.gameState.set('idle');
@@ -213,17 +227,21 @@ export class AppComponent {
 
   private async executeWinSequence(v1: number, v2: number, target: number) {
     this.isWinner.set(true);
-    // this.audioService.playSuccess(); // DISABLED - To re-enable later
+    this.showEventVideo.set(true);
     this.winMessage.set('Sync successfully established');
+    // Sequence continues in onVideoEnded
+  }
 
-    setTimeout(() => {
-      const nextLevel = this.currentLevel() + 1;
-      this.winMessage.set(`ACCESSING SECTOR: DATA_CORE_${nextLevel < 10 ? '0' : ''}${nextLevel}`);
-    }, 2500);
+  onVideoEnded() {
+    // 1. Start fade out of the win overlay
+    this.isTransitioning.set(true);
 
+    // 2. Wait for fade out animation (e.g. 1s) then reset for next level
     setTimeout(() => {
+      this.showEventVideo.set(false);
       this.currentLevel.update(l => l + 1);
-      this.generateChallenge();
-    }, 4500);
+      this.generateChallenge(); // This sets isWinner to false
+      this.isTransitioning.set(false);
+    }, 1000);
   }
 }
